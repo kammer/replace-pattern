@@ -49,7 +49,7 @@ log_lines = []
 
 def log_entry(file_path, old_value, new_value):
     timestamp = datetime.now().isoformat()
-    entry = f"[{timestamp}] File: {file_path}\n    Replaced: {old_value} → {new_value}\n"
+    entry = f"[{timestamp}] File: {file_path}\n    Replaced: {old_value} -> {new_value}\n"
     log_lines.append(entry)
 
 # === FILE FILTER ===

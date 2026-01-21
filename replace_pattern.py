@@ -140,8 +140,8 @@ def iter_target_files():
                     yield path
         return
 
-    # fallback: recursive walk
-    for dirpath, _, filenames in os.walk(root_dir):
+    # args.root must be set here
+    for dirpath, _, filenames in os.walk(args.root):
         for filename in filenames:
             if file_is_included(filename):
                 yield os.path.join(dirpath, filename)

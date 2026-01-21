@@ -22,6 +22,8 @@ parser.add_argument('--dry-run', action='store_true', help='Simulate only, do no
 parser.add_argument('--log', default='replacement_log.txt', help='Log file path')
 parser.add_argument('--files', nargs='*', help='Include only files matching these patterns (e.g. *.xml *.txt)')
 parser.add_argument('--files-exclude', nargs='*', help='Exclude files matching these patterns (e.g. *.bak *.tmp)')
+parser.add_argument('--paths', nargs='*', help='Explicit list of files to process (no directory walk)')
+parser.add_argument('--paths-file', help='Text file containing one file path per line')
 parser.add_argument('--summary-only', action='store_true', help='Suppress file-level replacement output')
 args = parser.parse_args()
 
@@ -97,12 +99,29 @@ def replace_in_file(file_path):
             log_entry(file_path, old, new)
 
 # === WALK FILES ===
-for dirpath, dirnames, filenames in os.walk(root_dir):
-    for filename in filenames:
-        if file_is_included(filename):
-            full_path = os.path.join(dirpath, filename)
-            replace_in_file(full_path)
+def iter_target_files():
+    if args.paths:
+        for p in args.paths:
+            yield p
+        return
 
+    if args.paths_file:
+        with open(args.paths_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                path = line.strip()
+                if path:
+                    yield path
+        return
+
+    # fallback: recursive walk
+    for dirpath, _, filenames in os.walk(root_dir):
+        for filename in filenames:
+            if file_is_included(filename):
+                yield os.path.join(dirpath, filename)
+                
+for file_path in iter_target_files():
+    replace_in_file(file_path)
+    
 # === SUMMARY ===
 summary = (
     "\n=== SUMMARY ===\n"

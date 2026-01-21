@@ -14,17 +14,44 @@ def print_color(text, color):
     print(f"{color}{text}{Color.RESET}")
 
 # === ARGUMENT PARSING ===
-parser = argparse.ArgumentParser(description='Generic recursive regex replacer for ASCII text files.')
-parser.add_argument('--root', required=True, help='Root directory to scan')
-parser.add_argument('--pattern', required=True, help='Regex pattern to search (with optional capture groups)')
-parser.add_argument('--replace', required=True, help='Replacement string (supports \1, \2, etc.)')
-parser.add_argument('--dry-run', action='store_true', help='Simulate only, do not modify files')
-parser.add_argument('--log', default='replacement_log.txt', help='Log file path')
-parser.add_argument('--files', nargs='*', help='Include only files matching these patterns (e.g. *.xml *.txt)')
-parser.add_argument('--files-exclude', nargs='*', help='Exclude files matching these patterns (e.g. *.bak *.tmp)')
-parser.add_argument('--paths', nargs='*', help='Explicit list of files to process (no directory walk)')
-parser.add_argument('--paths-file', help='Text file containing one file path per line')
-parser.add_argument('--summary-only', action='store_true', help='Suppress file-level replacement output')
+parser = argparse.ArgumentParser(
+    description='Generic recursive regex replacer for ASCII text files.'
+)
+
+# --- Target selection (exactly one required) ---
+target_group = parser.add_mutually_exclusive_group(required=True)
+target_group.add_argument(
+    '--root',
+    help='Root directory to recursively scan'
+)
+target_group.add_argument(
+    '--paths',
+    nargs='+',
+    help='Explicit list of files to process'
+)
+target_group.add_argument(
+    '--paths-file',
+    help='Text file containing one file path per line'
+)
+
+# --- Replacement options ---
+parser.add_argument('--pattern', required=True,
+                    help='Regex pattern to search (with optional capture groups)')
+parser.add_argument('--replace', required=True,
+                    help='Replacement string (supports \\1, \\2, etc.)')
+
+# --- Behavior options ---
+parser.add_argument('--dry-run', action='store_true',
+                    help='Simulate only, do not modify files')
+parser.add_argument('--log', default='replacement_log.txt',
+                    help='Log file path')
+parser.add_argument('--files', nargs='*',
+                    help='Include only files matching these patterns (e.g. *.xml)')
+parser.add_argument('--files-exclude', nargs='*',
+                    help='Exclude files matching these patterns (e.g. *.bak)')
+parser.add_argument('--summary-only', action='store_true',
+                    help='Suppress file-level replacement output')
+
 args = parser.parse_args()
 
 # === CONFIG ===
